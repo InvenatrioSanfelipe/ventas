@@ -931,7 +931,7 @@
             reader.readAsText(file);
         }
 
-        // Al buscar en administrar productos
+        // Buscar productos en administración y renderizar lista
         document.getElementById('busquedaAdmin').addEventListener('input', function() {
             const filtro = this.value.trim().toLowerCase();
             const productosFiltrados = products.filter(p =>
@@ -981,16 +981,6 @@
             });
         }
 
-        // Buscar productos en administración
-        document.getElementById('busquedaAdmin').addEventListener('input', function() {
-            const filtro = this.value.trim().toLowerCase();
-            const productosFiltrados = products.filter(p =>
-                p.codigo.toLowerCase().includes(filtro) ||
-                p.descripcion.toLowerCase().includes(filtro)
-            );
-            renderAdminProductList(productosFiltrados);
-        });
-
         // Abre el modal para editar un producto
         function abrirEditarProducto(codigo) {
             const product = products.find(p => p.codigo === codigo);
@@ -1002,8 +992,10 @@
             document.getElementById('editPiezas').value = product.piezas;
             document.getElementById('modalEditarProducto').classList.remove('hidden');
 
-            // Guardar el código actual para actualizar
-            document.getElementById('formEditarProducto').onsubmit = function(e) {
+            // Limpia eventos anteriores y asigna el nuevo
+            const form = document.getElementById('formEditarProducto');
+            form.onsubmit = null;
+            form.onsubmit = function(e) {
                 e.preventDefault();
                 actualizarProducto(product.codigo);
             };
@@ -1028,24 +1020,121 @@
             localStorage.setItem('products', JSON.stringify(products));
             alert('Producto actualizado correctamente.');
             cerrarModalEditarProducto();
-            renderAdminProductList(products);
+            // Refresca la lista con el filtro actual
+            const filtro = document.getElementById('busquedaAdmin').value.trim().toLowerCase();
+            const productosFiltrados = products.filter(p =>
+                p.codigo.toLowerCase().includes(filtro) ||
+                p.descripcion.toLowerCase().includes(filtro)
+            );
+            renderAdminProductList(productosFiltrados);
             renderProductList && renderProductList();
         }
 
         // Elimina un producto
         function eliminarProducto(codigo) {
             if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
-            // Busca el índice del producto
             const idx = products.findIndex(p => p.codigo === codigo);
             if (idx !== -1) {
-                products.splice(idx, 1); // Elimina el producto del arreglo
-                localStorage.setItem('products', JSON.stringify(products)); // Actualiza el almacenamiento
-                renderAdminProductList(products); // Refresca la lista de administración
-                renderProductList && renderProductList(); // Refresca la lista principal si existe
+                products.splice(idx, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                cerrarModalEditarProducto();
+                // Refresca la lista con el filtro actual
+                const filtro = document.getElementById('busquedaAdmin').value.trim().toLowerCase();
+                const productosFiltrados = products.filter(p =>
+                    p.codigo.toLowerCase().includes(filtro) ||
+                    p.descripcion.toLowerCase().includes(filtro)
+                );
+                renderAdminProductList(productosFiltrados);
+                renderProductList && renderProductList();
                 alert('Producto eliminado exitosamente');
-                cerrarModalEditarProducto && cerrarModalEditarProducto(); // Cierra el modal si está abierto
             }
         }
+
+// ===================== DEVOLUCIONES =====================
+
+// Renderiza la lista de productos para devoluciones según búsqueda
+document.getElementById('busquedaDevolucion').addEventListener('input', function() {
+    const filtro = this.value.trim().toLowerCase();
+    const tbody = document.getElementById('devolucionListaProductos');
+    tbody.innerHTML = '';
+    const filtrados = products.filter(p =>
+        p.codigo.toLowerCase().includes(filtro) ||
+        p.descripcion.toLowerCase().includes(filtro)
+    );
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">No se encontraron productos.</td></tr>`;
+        return;
+    }
+    filtrados.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-4 py-2">${product.codigo}</td>
+            <td class="px-4 py-2">${product.descripcion}</td>
+            <td class="px-4 py-2">${product.piezas}</td>
+            <td class="px-4 py-2">
+                <button class="text-green-600 hover:underline" onclick="realizarDevolucion('${product.codigo}')">Devolver</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+});
+
+// Función para devolver (aumentar piezas en 1)
+function realizarDevolucion(codigo) {
+    const prod = products.find(p => p.codigo === codigo);
+    if (!prod) return;
+    prod.piezas += 1; // Solo suma una pieza al inventario
+    localStorage.setItem('products', JSON.stringify(products));
+    alert('Devolución realizada. El inventario fue actualizado.');
+    // Refresca la lista de devoluciones y productos
+    document.getElementById('busquedaDevolucion').dispatchEvent(new Event('input'));
+    renderProductList && renderProductList();
+}
+
+// ===================== CORTE DIARIO =====================
+
+// Renderiza el corte diario al seleccionar fecha
+document.getElementById('fechaCorte').addEventListener('change', function() {
+    const fecha = this.value;
+    const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+    const ventasDelDia = ventas.filter(v => v.fecha === fecha);
+    const contenedor = document.getElementById('corteResultados');
+    if (ventasDelDia.length === 0) {
+        contenedor.innerHTML = `<div class="text-gray-500 py-4">No hay ventas registradas para esta fecha.</div>`;
+        return;
+    }
+    let totalDia = 0;
+    let html = `
+        <h2 class="text-xl font-semibold mb-4">Ventas del ${fecha}</h2>
+        <table class="min-w-full divide-y divide-gray-200 mb-4">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hora</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Productos</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    ventasDelDia.forEach(v => {
+        totalDia += v.total;
+        html += `
+            <tr>
+                <td class="px-4 py-2">${v.hora ? v.hora : ''}</td>
+                <td class="px-4 py-2">
+                    ${v.productos.map(p => `${p.descripcion} (x${p.cantidad})`).join('<br>')}
+                </td>
+                <td class="px-4 py-2">$${v.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    html += `
+            </tbody>
+        </table>
+        <div class="text-right font-bold text-lg">Total del día: $${totalDia.toFixed(2)}</div>
+    `;
+    contenedor.innerHTML = html;
+});
     </script>
 </body>
 </html>
