@@ -450,6 +450,21 @@
                 </form>
             </div>
         </div>
+
+        <!-- Agrega esto donde quieras la búsqueda y tabla -->
+        <div class="p-4 max-w-xl mx-auto">
+            <label for="busquedaProducto" class="font-semibold block mb-1">Producto/Código:</label>
+            <div class="relative w-full mb-4">
+                <input id="busquedaProducto" type="text" class="border rounded px-3 py-2 w-full" placeholder="Buscar producto o código..." autocomplete="off" oninput="mostrarSugerenciasVenta()">
+                <ul id="sugerenciasVenta" class="absolute z-10 bg-white border w-full rounded shadow-lg hidden"></ul>
+            </div>
+            <div id="productoSeleccionado" class="my-8 text-center"></div>
+        </div>
+        <div style="position:fixed; bottom:30px; right:40px; text-align:right; z-index:50;">
+            <div class="text-2xl font-bold">Total:</div>
+            <div id="ventaTotal" class="text-3xl font-bold text-green-700">$0.00</div>
+            <button class="btn-primary mt-2 px-6 py-2 rounded text-white font-semibold" onclick="abrirModalCobro()">Cobrar</button>
+        </div>
     </div>
 
     <div id="waitOverlay" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
@@ -467,6 +482,7 @@
         let ventaSeleccionados = [];
         let ventas = JSON.parse(localStorage.getItem('ventas')) || [];
         let totalVentaActual = 0;
+        let productosSeleccionados = [];
 
         // Ejecuta esto una vez para actualizar productos existentes
         products.forEach(p => {
