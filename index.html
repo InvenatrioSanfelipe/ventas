@@ -705,10 +705,15 @@
       if (!prod) return;
       const existe = carritoVenta.findIndex(p => p.codigo === prod.codigo);
       if (existe >= 0) {
-        carritoVenta[existe].cantidad = (parseInt(carritoVenta[existe].cantidad) || 0) + (parseInt(prod.cantidad) || 1);
-        carritoVenta[existe].importe = (parseFloat(carritoVenta[existe].importe) || 0) + (parseFloat(prod.importe) || 0);
+        // Solo suma 1 al carrito y suma el importe de 1 unidad
+        carritoVenta[existe].cantidad = (parseInt(carritoVenta[existe].cantidad) || 0) + 1;
+        // Calcula el importe unitario
+        const importeUnitario = (parseFloat(prod.importe) || 0) / (parseInt(prod.cantidad) || 1);
+        carritoVenta[existe].importe = (parseFloat(carritoVenta[existe].importe) || 0) + importeUnitario;
       } else {
-        carritoVenta.push({ ...prod });
+        // Agrega solo 1 unidad al carrito
+        const importeUnitario = (parseFloat(prod.importe) || 0) / (parseInt(prod.cantidad) || 1);
+        carritoVenta.push({ ...prod, cantidad: 1, importe: importeUnitario });
       }
       mostrarAlerta("🛒 Producto agregado al carrito de venta", "success");
       actualizarCarritoVenta();
