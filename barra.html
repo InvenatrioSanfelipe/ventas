@@ -114,6 +114,12 @@
                         <span>Importar/Exportar</span>
                     </a>
                 </li>
+                <!-- Nueva opción para Administrar Productos -->
+                <li class="mb-2">
+                    <a href="#" class="sidebar-item" onclick="mostrarSeccion('adminProductos')">
+                        <i class="fas fa-edit mr-2"></i> Administrar Productos
+                    </a>
+                </li>
             </ul>
         </div>
         
@@ -332,7 +338,7 @@
                 <div class="flex-1">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Ventas</h1>
                     <input id="busquedaVenta" type="text" placeholder="Buscar producto por código o nombre exacto..." class="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 mb-4">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
@@ -353,23 +359,38 @@
                         <span id="contadorTickets" class="font-bold text-indigo-600">0</span>
                     </div>
                     <h2 class="text-xl font-semibold mb-4">Ticket de Venta</h2>
-                    <div id="ventaTicket" class="flex-1 overflow-y-auto mb-4">
+                    <div id="ventaTicket" class="flex-1 overflow-y-auto mb-4 border-b pb-4">
                         <!-- Productos seleccionados aquí -->
                     </div>
-                    <button class="btn-primary w-full mt-2 py-2 rounded text-white font-semibold" onclick="finalizarVenta()">Cobrar</button>
                     <!-- Total fijo en la parte inferior -->
-                    <div class="absolute bottom-12 left-0 w-full px-6">
-                        <div class="border-t pt-4">
-                            <div class="flex justify-between text-lg font-bold">
-                                <span>Total:</span>
-                                <span id="ventaTotal">$0.00</span>
-                            </div>
+                    <div class="absolute bottom-16 left-0 w-full px-6">
+                        <div class="flex justify-between text-lg font-bold py-2">
+                            <span>Total:</span>
+                            <span id="ventaTotal">$0.00</span>
                         </div>
+                        <button class="btn-primary w-full mt-2 py-2 rounded text-white font-semibold" onclick="abrirModalCobro()">Cobrar</button>
                     </div>
                     <!-- Fecha y hora en la parte más baja -->
                     <div class="absolute bottom-2 left-0 w-full px-6 text-xs text-gray-500 flex justify-between">
                         <span id="ticketFecha"></span>
                         <span id="ticketHora"></span>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal de cobro -->
+            <div id="modalCobro" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg p-8 shadow-lg w-96">
+                    <h2 class="text-xl font-bold mb-4">Cobrar Venta</h2>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Total a cobrar:</label>
+                        <div class="text-2xl font-bold mb-2" id="modalTotal"></div>
+                        <label class="block text-sm font-medium mb-1">Monto recibido:</label>
+                        <input type="number" id="montoRecibido" class="w-full px-3 py-2 border rounded mb-2" min="0" step="0.01">
+                        <div id="cambioMsg" class="text-green-600 font-semibold"></div>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button onclick="cerrarModalCobro()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cerrar</button>
+                        <button onclick="finalizarVentaConCobro()" class="btn-primary px-4 py-2 rounded text-white font-semibold">Confirmar</button>
                     </div>
                 </div>
             </div>
@@ -385,6 +406,48 @@
                     <button class="btn-primary py-2 rounded text-white font-semibold" onclick="importarDatos()">Importar Inventario y Ventas</button>
                 </div>
                 <div id="importExportMsg" class="mt-4 text-sm"></div>
+            </div>
+        </div>
+
+        <!-- Nueva sección de Administrar Productos -->
+        <div id="adminProductos" class="seccion hidden p-8">
+            <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8">
+                <h1 class="text-2xl font-bold mb-6 text-gray-800">Administrar Productos</h1>
+                <input id="busquedaAdmin" type="text" placeholder="Buscar producto por código o nombre exacto..." class="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <div id="adminProductoForm"></div>
+            </div>
+        </div>
+
+        <!-- Modal para editar producto -->
+        <div id="modalEditarProducto" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg p-8 shadow-lg w-full max-w-lg">
+                <h2 class="text-xl font-bold mb-4">Editar Producto</h2>
+                <form id="formEditarProducto" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium">Código</label>
+                        <input type="text" id="editCodigo" disabled class="w-full px-3 py-2 border rounded bg-gray-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Descripción</label>
+                        <input type="text" id="editDescripcion" class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Precio Costo</label>
+                        <input type="number" id="editPrecioCosto" min="0" step="0.01" class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Precio Venta</label>
+                        <input type="number" id="editPrecioCliente" min="0" step="0.01" class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Piezas</label>
+                        <input type="number" id="editPiezas" min="0" step="1" class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button type="button" onclick="cerrarModalEditarProducto()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cancelar</button>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded text-white font-semibold">Actualizar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -403,6 +466,7 @@
         let products = JSON.parse(localStorage.getItem('products')) || [];
         let ventaSeleccionados = [];
         let ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+        let totalVentaActual = 0;
 
         // Ejecuta esto una vez para actualizar productos existentes
         products.forEach(p => {
@@ -623,7 +687,7 @@
         // mostrarEspera();
         // setTimeout(ocultarEspera, 2000); // Oculta después de 2 segundos
 
-        // Renderiza la lista de productos para venta (solo coincidencia exacta)
+        // Renderiza la lista de productos para venta (coincidencia exacta)
         function renderVentaProductos(filtro = '') {
             const tbody = document.getElementById('ventaListaProductos');
             tbody.innerHTML = '';
@@ -658,6 +722,34 @@
             });
         }
 
+        // Agrega producto al ticket de venta
+        function agregarAVenta(codigo) {
+            const prod = products.find(p => p.codigo === codigo);
+            if (!prod) return;
+
+            let item = ventaSeleccionados.find(i => i.codigo === codigo);
+            if (item) {
+                if (item.cantidad < prod.piezas) {
+                    item.cantidad++;
+                } else {
+                    alert('No hay más piezas disponibles.');
+                }
+            } else {
+                if (prod.piezas > 0) {
+                    ventaSeleccionados.push({
+                        codigo: prod.codigo,
+                        descripcion: prod.descripcion,
+                        precio: prod.precioCliente,
+                        cantidad: 1,
+                        max: prod.piezas
+                    });
+                } else {
+                    alert('Producto sin existencias.');
+                }
+            }
+            renderVentaTicket();
+        }
+
         // Renderiza el ticket de venta y actualiza fecha/hora y total
         function renderVentaTicket() {
             const cont = document.getElementById('ventaTicket');
@@ -684,12 +776,19 @@
                     cont.appendChild(div);
                 });
             }
+            totalVentaActual = total;
             document.getElementById('ventaTotal').textContent = '$' + total.toFixed(2);
 
             // Fecha y hora actual
             const now = new Date();
             document.getElementById('ticketFecha').textContent = now.toLocaleDateString();
             document.getElementById('ticketHora').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Quita un producto del ticket
+        function quitarDeVenta(codigo) {
+            ventaSeleccionados = ventaSeleccionados.filter(i => i.codigo !== codigo);
+            renderVentaTicket();
         }
 
         // Contador de tickets del día
@@ -712,218 +811,241 @@
             renderContadorTickets();
         });
 
-        // Al finalizar venta, actualiza contador de tickets
-        function finalizarVenta() {
+        // Modal de cobro
+        function abrirModalCobro() {
             if (ventaSeleccionados.length === 0) {
                 alert('No hay productos en el ticket.');
                 return;
             }
-            let totalVenta = 0;
+            document.getElementById('modalTotal').textContent = '$' + totalVentaActual.toFixed(2);
+            document.getElementById('montoRecibido').value = '';
+            document.getElementById('cambioMsg').textContent = '';
+            document.getElementById('modalCobro').classList.remove('hidden');
+            document.getElementById('montoRecibido').focus();
+        }
+
+        function cerrarModalCobro() {
+            document.getElementById('modalCobro').classList.add('hidden');
+        }
+
+        // Finaliza la venta con cobro y calcula cambio
+        function finalizarVentaConCobro() {
+            const monto = parseFloat(document.getElementById('montoRecibido').value);
+            if (isNaN(monto) || monto < totalVentaActual) {
+                document.getElementById('cambioMsg').textContent = 'Monto insuficiente.';
+                return;
+            }
+            const cambio = monto - totalVentaActual;
+            document.getElementById('cambioMsg').textContent = 'Cambio: $' + cambio.toFixed(2);
+
+            // Guarda la venta
             let productosVendidos = [];
             ventaSeleccionados.forEach(item => {
                 const prod = products.find(p => p.codigo === item.codigo);
                 if (prod) {
-                    prod.piezas -= item.cantidad;
-                    if (prod.piezas < 0) prod.piezas = 0;
                     productosVendidos.push({
                         codigo: prod.codigo,
                         descripcion: prod.descripcion,
-                        cantidad: item.cantidad,
-                        precio: prod.precioCliente
+                        precio: prod.precioCliente,
+                        cantidad: item.cantidad
                     });
-                    totalVenta += item.cantidad * prod.precioCliente;
-                }
+                    // Actualiza el stock del producto
+                    prod.piezas -= item.cantidad;
+                }   
             });
 
-            // Guarda la venta con fecha y hora
+            // Guarda en localStorage
             ventas.push({
-                fecha: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                fecha: new Date().toISOString().slice(0, 10),
                 productos: productosVendidos,
-                total: totalVenta
+                total: totalVentaActual
             });
             localStorage.setItem('ventas', JSON.stringify(ventas));
             localStorage.setItem('products', JSON.stringify(products));
+
+            // Resetea el ticket de venta
             ventaSeleccionados = [];
             renderVentaTicket();
-            renderVentaProductos(document.getElementById('busquedaVenta').value);
-            renderProductList();
             renderContadorTickets();
-            alert('¡Venta realizada!');
+            cerrarModalCobro();
+            alert('Venta registrada exitosamente');
         }
 
-        // Renderiza productos al entrar a la sección de devoluciones
-        document.querySelector('a[onclick*="devoluciones"]').addEventListener('click', function() {
-            renderDevolucionProductos();
-        });
-
-        // Renderiza la lista de productos para devolución
-        function renderDevolucionProductos(filtro = '') {
-            const tbody = document.getElementById('devolucionListaProductos');
-            tbody.innerHTML = '';
-            const filtroLower = filtro.toLowerCase();
-
-            const filtrados = products.filter(p =>
-                p.codigo.toLowerCase().includes(filtroLower) ||
-                p.descripcion.toLowerCase().includes(filtroLower)
-            );
-
-            if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">No se encontraron productos.</td></tr>`;
-                return;
-            }
-
-            filtrados.forEach(product => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-2">${product.codigo}</td>
-                    <td class="px-4 py-2">${product.descripcion}</td>
-                    <td class="px-4 py-2">${product.piezas}</td>
-                    <td class="px-4 py-2">
-                        <button class="text-green-600 hover:underline" onclick="devolverProducto('${product.codigo}')">Devolver</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Devuelve un producto (aumenta piezas en 1)
-        function devolverProducto(codigo) {
-            const prod = products.find(p => p.codigo === codigo);
-            if (!prod) return;
-
-            // Solo permite devolver si piezas < stockOriginal
-            if (prod.piezas < prod.stockOriginal) {
-                prod.piezas += 1;
-                localStorage.setItem('products', JSON.stringify(products));
-                renderDevolucionProductos(document.getElementById('busquedaDevolucion').value);
-                renderProductList();
-                alert('Producto devuelto correctamente.');
-            } else {
-                alert('No puedes devolver más piezas de las que se vendieron.');
-            }
-        }
-
-        // Evento para buscar productos en devoluciones
-        document.getElementById('busquedaDevolucion').addEventListener('input', function() {
-            renderDevolucionProductos(this.value);
-        });
-
-        function renderCorte(fecha) {
-            const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
-            const ventasDia = ventas.filter(v => v.fecha === fecha);
-            const cont = document.getElementById('corteResultados');
-            if (ventasDia.length === 0) {
-                cont.innerHTML = `<div class="text-gray-500">No hay ventas registradas para esta fecha.</div>`;
-                return;
-            }
-            let total = 0;
-            let html = `
-                <table class="min-w-full divide-y divide-gray-200 mb-4">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-            `;
-            ventasDia.forEach(venta => {
-                venta.productos.forEach(prod => {
-                    html += `
-                        <tr>
-                            <td class="px-4 py-2">${prod.codigo}</td>
-                            <td class="px-4 py-2">${prod.descripcion}</td>
-                            <td class="px-4 py-2">${prod.cantidad}</td>
-                            <td class="px-4 py-2">$${prod.precio.toFixed(2)}</td>
-                            <td class="px-4 py-2">$${(prod.precio * prod.cantidad).toFixed(2)}</td>
-                        </tr>
-                    `;
-                    total += prod.precio * prod.cantidad;
-                });
-            });
-            html += `
-                    </tbody>
-                </table>
-                <div class="text-right text-xl font-bold">Total del día: $${total.toFixed(2)}</div>
-            `;
-            cont.innerHTML = html;
-        }
-
-        // Evento para seleccionar fecha
-        document.getElementById('fechaCorte').addEventListener('change', function() {
-            renderCorte(this.value);
-        });
-
-        // Renderiza el corte del día actual al entrar a la sección
-        document.querySelector('a[onclick*="corte"]').addEventListener('click', function() {
-            const hoy = new Date().toISOString().slice(0, 10);
-            document.getElementById('fechaCorte').value = hoy;
-            renderCorte(hoy);
-        });
-
-        // Exportar datos a archivo JSON
+        // Exportar datos a JSON
         function exportarDatos() {
             const data = {
-        products: JSON.parse(localStorage.getItem('products') || '[]'),
-        ventas: JSON.parse(localStorage.getItem('ventas') || '[]')
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'inventario_exportado.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    document.getElementById('importExportMsg').textContent = "Archivo exportado correctamente.";
-}
-
-function importarDatos() {
-    const input = document.getElementById('archivoImportar');
-    const msg = document.getElementById('importExportMsg');
-    if (!input.files.length) {
-        msg.textContent = "Selecciona un archivo para importar.";
-        return;
-    }
-    const file = input.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (data.products && data.ventas) {
-                localStorage.setItem('products', JSON.stringify(data.products));
-                localStorage.setItem('ventas', JSON.stringify(data.ventas));
-                msg.textContent = "Datos importados correctamente. Recarga la página para ver los cambios.";
-            } else {
-                msg.textContent = "El archivo no es válido.";
-            }
-        } catch (err) {
-            msg.textContent = "Error al leer el archivo.";
+                products: JSON.parse(localStorage.getItem('products')) || [],
+                ventas: JSON.parse(localStorage.getItem('ventas')) || []
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'datos_inventario_ventas.json';
+            a.click();
+            URL.revokeObjectURL(url);
         }
-    };
-    reader.readAsText(file);
-}
 
-// Cerrar sesión: redirige y cierra ventana si es posible
-document.querySelector('.p-4 button').addEventListener('click', function() {
-    localStorage.clear();
-    window.location.href = "Index.html";
-    setTimeout(() => { window.close(); }, 300);
-});
+        // Importar datos desde JSON
+        function importarDatos() {
+            const fileInput = document.getElementById('archivoImportar');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Por favor selecciona un archivo para importar');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Importa productos
+                    if (Array.isArray(data.products)) {
+                        data.products.forEach(p => {
+                            // Verifica si el producto ya existe
+                            const existingProduct = products.find(prod => prod.codigo === p.codigo);
+                            if (!existingProduct) {
+                                products.push(p);
+                            }
+                        });
+                    }
+                    
+                    // Importa ventas
+                    if (Array.isArray(data.ventas)) {
+                        data.ventas.forEach(v => {
+                            ventas.push(v);
+                        });
+                    }
+                    
+                    // Guarda en localStorage
+                    localStorage.setItem('products', JSON.stringify(products));
+                    localStorage.setItem('ventas', JSON.stringify(ventas));
+                    
+                    alert('Datos importados exitosamente');
+                } catch (error) {
+                    alert('Error al importar datos: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
 
-// Bloquea Ctrl+U y F12 para evitar ver el código fuente
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey && e.key.toLowerCase() === 'u') || e.key === 'F12') {
-        e.preventDefault();
-        alert('Acceso al código deshabilitado.');
-        return false;
-    }
-});
+        // Al buscar en administrar productos
+        document.getElementById('busquedaAdmin').addEventListener('input', function() {
+            const filtro = this.value.trim().toLowerCase();
+            const productosFiltrados = products.filter(p =>
+                p.codigo.toLowerCase().includes(filtro) ||
+                p.descripcion.toLowerCase().includes(filtro)
+            );
+            renderAdminProductList(productosFiltrados);
+        });
+
+        // Renderiza la lista de productos en la sección de administrar productos
+        function renderAdminProductList(lista) {
+            const contenedor = document.getElementById('adminProductoForm');
+            contenedor.innerHTML = '';
+
+            if (lista.length === 0) {
+                contenedor.innerHTML = `<p class="text-center text-gray-500 py-4">No se encontraron productos.</p>`;
+                return;
+            }
+
+            lista.forEach(product => {
+                const div = document.createElement('div');
+                div.className = "bg-white rounded-lg shadow-md p-4 mb-4";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <h3 class="text-lg font-semibold">${product.descripcion}</h3>
+                            <p class="text-sm text-gray-500">Código: ${product.codigo}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold">$${product.precioCliente.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500">Costo: $${product.precioCosto.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        ${product.categorias.map(cat => `<span class="bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full px-3 py-1">${cat}</span>`).join('')}
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button class="btn-primary px-4 py-2 rounded text-white font-semibold" onclick="abrirEditarProducto('${product.codigo}')">
+                            <i class="fas fa-edit mr-2"></i> Editar
+                        </button>
+                        <button class="px-4 py-2 rounded bg-red-500 text-white font-semibold" onclick="eliminarProducto('${product.codigo}')">
+                            <i class="fas fa-trash mr-2"></i> Eliminar
+                        </button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        // Buscar productos en administración
+        document.getElementById('busquedaAdmin').addEventListener('input', function() {
+            const filtro = this.value.trim().toLowerCase();
+            const productosFiltrados = products.filter(p =>
+                p.codigo.toLowerCase().includes(filtro) ||
+                p.descripcion.toLowerCase().includes(filtro)
+            );
+            renderAdminProductList(productosFiltrados);
+        });
+
+        // Abre el modal para editar un producto
+        function abrirEditarProducto(codigo) {
+            const product = products.find(p => p.codigo === codigo);
+            if (!product) return;
+            document.getElementById('editCodigo').value = product.codigo;
+            document.getElementById('editDescripcion').value = product.descripcion;
+            document.getElementById('editPrecioCosto').value = product.precioCosto;
+            document.getElementById('editPrecioCliente').value = product.precioCliente;
+            document.getElementById('editPiezas').value = product.piezas;
+            document.getElementById('modalEditarProducto').classList.remove('hidden');
+
+            // Guardar el código actual para actualizar
+            document.getElementById('formEditarProducto').onsubmit = function(e) {
+                e.preventDefault();
+                actualizarProducto(product.codigo);
+            };
+        }
+
+        // Cierra el modal de edición
+        function cerrarModalEditarProducto() {
+            document.getElementById('modalEditarProducto').classList.add('hidden');
+        }
+
+        // Actualiza el producto seleccionado (NO crea uno nuevo)
+        function actualizarProducto(codigo) {
+            const idx = products.findIndex(p => p.codigo === codigo);
+            if (idx === -1) {
+                alert('Producto no encontrado.');
+                return;
+            }
+            products[idx].descripcion = document.getElementById('editDescripcion').value.trim();
+            products[idx].precioCosto = parseFloat(document.getElementById('editPrecioCosto').value);
+            products[idx].precioCliente = parseFloat(document.getElementById('editPrecioCliente').value);
+            products[idx].piezas = parseInt(document.getElementById('editPiezas').value);
+            localStorage.setItem('products', JSON.stringify(products));
+            alert('Producto actualizado correctamente.');
+            cerrarModalEditarProducto();
+            renderAdminProductList(products);
+            renderProductList && renderProductList();
+        }
+
+        // Elimina un producto
+        function eliminarProducto(codigo) {
+            if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
+            // Busca el índice del producto
+            const idx = products.findIndex(p => p.codigo === codigo);
+            if (idx !== -1) {
+                products.splice(idx, 1); // Elimina el producto del arreglo
+                localStorage.setItem('products', JSON.stringify(products)); // Actualiza el almacenamiento
+                renderAdminProductList(products); // Refresca la lista de administración
+                renderProductList && renderProductList(); // Refresca la lista principal si existe
+                alert('Producto eliminado exitosamente');
+                cerrarModalEditarProducto && cerrarModalEditarProducto(); // Cierra el modal si está abierto
+            }
+        }
     </script>
 </body>
 </html>
