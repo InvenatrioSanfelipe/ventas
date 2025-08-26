@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dispositivos Ingresados</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #00c3ff, #005bea);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    h2 {
+      text-align: center;
+      color: #005bea;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    thead {
+      background: linear-gradient(90deg, #00c3ff, #005bea);
+      color: #fff;
+    }
+    tr:hover {
+      background: #f2f8ff;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 15px;
+      background: linear-gradient(90deg, #00c3ff, #005bea);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #005bea, #00c3ff);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📱 Dispositivos Ingresados</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Modelo</th>
+        </tr>
+      </thead>
+      <tbody id="tablaDispositivos">
+        <tr><td colspan="2">No hay dispositivos registrados.</td></tr>
+      </tbody>
+    </table>
+    <a href="agregar_dispositivo.html" class="btn">➕ Agregar Dispositivo</a>
+  </div>
+
+  <script>
+    const tabla = document.getElementById("tablaDispositivos");
+    let dispositivos = JSON.parse(localStorage.getItem("dispositivos")) || [];
+
+    if (dispositivos.length > 0) {
+      tabla.innerHTML = "";
+      dispositivos.forEach(d => {
+        let fila = document.createElement("tr");
+        fila.innerHTML = `<td>${d.nombre}</td><td>${d.modelo}</td>`;
+        tabla.appendChild(fila);
+      });
+    }
+  </script>
+</body>
+</html>
