@@ -2,185 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar Sesión - Sistema de Ventas</title>
+  <title>Agregar Dispositivo</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #00c3ff, #005bea);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(120deg, #00c3ff 0%, #005bea 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    .login-container {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      padding: 40px 32px 32px 32px;
-      width: 100%;
-      max-width: 370px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      animation: fadeIn 0.8s;
-    }
-    .login-logo {
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(135deg, #00c3ff 60%, #005bea 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 12px rgba(0,195,255,0.13);
-    }
-    .login-logo svg {
-      width: 40px;
-      height: 40px;
-      fill: #fff;
-    }
-    .login-title {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: #005bea;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-    .login-subtitle {
-      color: #888;
-      font-size: 1.05rem;
-      margin-bottom: 22px;
-      text-align: center;
     }
     form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 16px;
+      color: #005bea;
+    }
+    input, button {
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    label {
-      font-weight: 600;
-      color: #222;
-      margin-bottom: 4px;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 1rem;
     }
-    input[type="text"], input[type="password"] {
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1.5px solid #e0e0e0;
-      font-size: 1.08rem;
-      background: #f7fafd;
-      transition: border 0.2s;
-    }
-    input[type="text"]:focus, input[type="password"]:focus {
-      border: 1.5px solid #00c3ff;
-      outline: none;
-    }
-    .btn-login {
-      background: linear-gradient(90deg, #00c3ff 0%, #005bea 100%);
+    button {
+      background: linear-gradient(90deg, #00c3ff, #005bea);
       color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 0;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,195,255,0.09);
-      transition: background 0.2s, box-shadow 0.2s;
-      margin-top: 8px;
+      border: none;
     }
-    .btn-login:hover {
-      background: linear-gradient(90deg, #005bea 0%, #00c3ff 100%);
-      box-shadow: 0 4px 16px rgba(0,195,255,0.18);
+    button:hover {
+      background: linear-gradient(90deg, #005bea, #00c3ff);
     }
-    .login-footer {
-      margin-top: 18px;
-      color: #888;
-      font-size: 0.98rem;
+    a {
+      display: block;
       text-align: center;
-    }
-    .error-message {
-      color: #d9534f;
-      background: #ffeaea;
-      border-radius: 6px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      font-size: 1rem;
-      display: none;
-      text-align: center;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-    @media (max-width: 500px) {
-      .login-container {
-        padding: 28px 8px 18px 8px;
-      }
+      margin-top: 12px;
+      color: #005bea;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-logo">
-      <!-- Simple SVG icon -->
-      <svg viewBox="0 0 48 48">
-        <circle cx="24" cy="24" r="22" opacity="0.2"/>
-        <path d="M24 12a8 8 0 1 1 0 16a8 8 0 0 1 0-16zm0 20c-7.2 0-14 3.6-14 7.2V40h28v-0.8C38 35.6 31.2 32 24 32z"/>
-      </svg>
-    </div>
-    <div class="login-title">Bienvenido</div>
-    <div class="login-subtitle">Accede a tu sistema de ventas</div>
-    <div class="error-message" id="errorMsg"></div>
-    <form id="loginForm" autocomplete="off" onsubmit="return validarLogin(event)">
-      <div>
-        <label for="usuario">Usuario</label>
-        <input type="text" id="usuario" name="usuario" placeholder="Ingresa tu usuario" required>
-      </div>
-      <div>
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" placeholder="Contraseña" required>
-      </div>
-      <button type="submit" class="btn-login">Iniciar Sesión</button>
-    </form>
-    <div class="login-footer">
-      © 2025 Sistema de Ventas. Todos los derechos reservados.
-    </div>
-  </div>
+  <form id="formDispositivo">
+    <h2>Agregar Dispositivo</h2>
+    <input type="text" id="nombre" placeholder="Nombre del dispositivo" required>
+    <input type="text" id="modelo" placeholder="Modelo" required>
+    <button type="submit">Guardar</button>
+    <a href="dispositivos.html">📋 Ver dispositivos</a>
+  </form>
+
   <script>
-    // Validación básica de login (solo frontend, reemplaza con tu lógica real)
-    function validarLogin(event) {
-      event.preventDefault();
-      const usuario = document.getElementById('usuario').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorMsg = document.getElementById('errorMsg');
-      errorMsg.style.display = "none";
+    document.getElementById("formDispositivo").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-      // Demo: usuario = admin, password = 1234
-      if (usuario === "jose" && password === "789654123") {
-        errorMsg.style.display = "none";
-        // Redirige al dashboard o página principal
-        window.location.href = "barra.html";
-        return false;
-      } else {
-        errorMsg.textContent = "Usuario o contraseña incorrectos.";
-        errorMsg.style.display = "block";
-        return false;
-      }
-    }
+      let nombre = document.getElementById("nombre").value.trim();
+      let modelo = document.getElementById("modelo").value.trim();
 
-    // Bloquea Ctrl+U y F12 para evitar ver el código fuente
-    document.addEventListener('keydown', function(e) {
-      if ((e.ctrlKey && e.key.toLowerCase() === 'u') || e.key === 'F12') {
-        e.preventDefault();
-        alert('Acceso al código deshabilitado.');
-        return false;
+      if (nombre && modelo) {
+        let dispositivos = JSON.parse(localStorage.getItem("dispositivos")) || [];
+        dispositivos.push({ nombre, modelo });
+        localStorage.setItem("dispositivos", JSON.stringify(dispositivos));
+        alert("✅ Dispositivo guardado correctamente");
+        document.getElementById("formDispositivo").reset();
       }
     });
   </script>
 </body>
 </html>
-
